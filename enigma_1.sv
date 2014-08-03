@@ -19,26 +19,33 @@ logic [5:0] r2;
 logic [5:0] r3;
 
 logic signed [5:0] r1_presymb_i;
-logic        [5:0] r1_symb_i;
-logic        [5:0] r1_symb_o;
+logic signed [5:0] r1_symb_i;
+logic signed [5:0] r1_symb_o;
 logic signed [5:0] r1_prebacksymb_i;
-logic        [5:0] r1_backsymb_i;
-logic        [5:0] r1_backsymb_o;
+logic signed [5:0] r1_backsymb_i;
+logic signed [5:0] r1_backsymb_o;
 
 logic signed [5:0] r2_presymb_i;
-logic        [5:0] r2_symb_i;
-logic        [5:0] r2_symb_o;
+logic signed [5:0] r2_symb_i;
+logic signed [5:0] r2_symb_o;
 logic signed [5:0] r2_prebacksymb_i;
-logic        [5:0] r2_backsymb_i;
-logic        [5:0] r2_backsymb_o;
+logic signed [5:0] r2_backsymb_i;
+logic signed [5:0] r2_backsymb_o;
 
 logic signed [5:0] r3_presymb_i;
-logic        [5:0] r3_symb_i;
-logic        [5:0] r3_symb_o;
-logic        [5:0] r3_backsymb_i;
-logic        [5:0] r3_backsymb_o;
+logic signed [5:0] r3_symb_i;
+logic signed [5:0] r3_symb_o;
+logic signed [5:0] r3_backsymb_i;
+logic signed [5:0] r3_backsymb_o;
 
 logic signed [5:0] out_presymb_o;
+
+logic signed [5:0] abs1;
+logic signed [5:0] abs2;
+logic signed [5:0] abs3;
+logic signed [5:0] abs4;
+logic signed [5:0] abs5;
+logic signed [5:0] abs6;
 
 //GATE BLOCK INPUT AND OUTPUT OF THE MACHINE
 //gate incoming symbol addition operation (G + R1); (trigger is needed for r1 counter's trigger delay compensation)
@@ -52,7 +59,13 @@ begin
   else if ( (in_symb_i > 0) && (in_symb_i < 27) )
     begin
       if ( r1_presymb_i < 1 )
-        r1_symb_i <= r1_presymb_i + 26;
+        begin
+        abs1 = r1_presymb_i + 26;
+          if ( abs1 > 0 )
+            r1_symb_i = abs1;
+          else if ( abs1 < 0 )
+            r1_symb_i = 0 - abs1;
+        end
       else if ( r1_presymb_i > 26 )
         r1_symb_i <= r1_presymb_i - 26;
       else 
@@ -69,7 +82,13 @@ begin
   if ( (r1_backsymb_o > 0) && (r1_backsymb_o < 27) )
     begin
       if ( out_presymb_o < 1 )
-        out_symb_o = out_presymb_o + 26;
+        begin
+        abs2 = out_presymb_o + 26;
+          if ( abs2 > 0 )
+            out_symb_o = abs2;
+          else if ( abs2 < 0 )
+            out_symb_o = 0 - abs2;
+        end
       else if ( out_presymb_o > 26 )
         out_symb_o = out_presymb_o - 26;
       else
@@ -131,7 +150,13 @@ begin
   if ( (r1_symb_o > 0) && (r1_symb_o < 27) )
     begin
       if ( r2_presymb_i < 1 )
-        r2_symb_i = r2_presymb_i + 26;
+        begin
+        abs3 = r2_presymb_i + 26;
+          if ( abs3 > 0 )
+            r2_symb_i = abs3;
+          else if ( abs3 < 0 )
+            r2_symb_i = 0 - abs3;
+        end
       else if ( r2_presymb_i > 26 )
         r2_symb_i = r2_presymb_i - 26;
       else
@@ -146,7 +171,13 @@ begin
   if ( (r2_backsymb_o > 0) && (r2_backsymb_o < 27) )
     begin
       if ( r1_prebacksymb_i < 1 )
-        r1_backsymb_i = r1_prebacksymb_i + 26;
+        begin
+        abs4 = r1_prebacksymb_i + 26;
+          if ( abs4 > 0 )
+            r1_backsymb_i = abs4;
+          else if ( abs4 < 0 )
+            r1_backsymb_i = 0 - abs4;
+        end
       else if ( r1_prebacksymb_i > 26 )
         r1_backsymb_i = r1_prebacksymb_i - 26;
       else 
@@ -242,7 +273,13 @@ begin
   if ( (r2_symb_o > 0) && (r2_symb_o < 27) )
     begin
       if ( r3_presymb_i < 1 )
-        r3_symb_i = r3_presymb_i + 26;
+        begin
+        abs5 = r3_presymb_i + 26;
+          if ( abs5 > 0 )
+            r3_symb_i = abs5;
+          else if ( abs5 < 0 )
+            r3_symb_i = 0 - abs5;
+        end
       else if ( r3_presymb_i > 26 )
         r3_symb_i = r3_presymb_i - 26;
       else
@@ -257,7 +294,13 @@ begin
   if ( (r3_backsymb_o > 0) && (r3_backsymb_o < 27) )
     begin
       if ( r2_prebacksymb_i < 1 )
-        r2_backsymb_i = r2_prebacksymb_i + 26;
+        begin
+        abs6 = r2_prebacksymb_i + 26;
+          if ( abs6 > 0 )
+            r2_backsymb_i = abs6;
+          else if ( abs6 < 0 )
+            r2_backsymb_i = 0 - abs6;
+        end
       else if ( r2_prebacksymb_i > 26 )
         r2_backsymb_i = r2_prebacksymb_i - 26;
       else

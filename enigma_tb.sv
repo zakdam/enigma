@@ -7,6 +7,7 @@ logic signed [5:0] wrap_i;     //receiving encoded symbol from enigma
 logic signed [5:0] wrap_o;     //generating incoming symbol for enigma
 
 integer i;
+integer j;
 
 reg[5:0]def_mem[0:15];
   
@@ -58,9 +59,11 @@ initial
 initial
   begin
     outfile = $fopen("out_file.txt", "w");
-       forever begin
-        #10 if ( (wrap_i > 0) && (wrap_i < 27) )
+    j = 0;
+      forever begin
+        #10 if ( (wrap_i > 0) && (wrap_i < 27) && (j < symb_numb_i) )
           begin
+            j = j + 1;
             $fwrite (outfile, "%d\t", wrap_i);
             @( posedge clk_i );
             @( posedge clk_i );

@@ -2,14 +2,13 @@ module enigma_tb;
 
 logic              clk_i;
 logic              rst_i;
-//logic        [5:0] symb_numb_i;
-logic signed [5:0] wrap_i;    //receiving encoded symbol from enigma
+logic        [5:0] symb_numb_i;
+logic signed [5:0] wrap_i;     //receiving encoded symbol from enigma
 logic signed [5:0] wrap_o;     //generating incoming symbol for enigma
 
 integer i;
-//integer j;
+
 reg[5:0]def_mem[0:15];
-  //logic [5:0] wrap_o;
   
 integer outfile;
 
@@ -32,19 +31,17 @@ initial
     rst_i = 1'b1;
   end
 
-/*
 //symbols' number
 initial
   begin
-    symb_numb_i = 6'd6;
+    symb_numb_i = 6'd3;
   end
-*/
 
 //reading from file to memory  
 initial 
   begin
     $readmemb( "in_file.txt", def_mem );
-    for ( i=0; i<6; i=i+1 )
+    for ( i=0; i<=(symb_numb_i); i=i+1 )
       begin
         wrap_o = 0;
         wrap_o = def_mem[i];
@@ -61,10 +58,11 @@ initial
 initial
   begin
     outfile = $fopen("out_file.txt", "w");
-      begin
-        if ( (wrap_i > 0) && (wrap_i < 27) )
+       forever begin
+        #10 if ( (wrap_i > 0) && (wrap_i < 27) )
           begin
-            $fwrite (outfile, "%d\n", wrap_i);
+            $fwrite (outfile, "%d\t", wrap_i);
+            @( posedge clk_i );
             @( posedge clk_i );
             @( posedge clk_i );
             @( posedge clk_i );
@@ -83,5 +81,3 @@ enigma_1 eg(
 );
 
 endmodule
-
-

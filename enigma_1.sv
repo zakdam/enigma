@@ -9,90 +9,90 @@ parameter R3_PAR = 1
 (
 input logic        clk_i,       //synchrosignal
 input logic        rst_i,       //asynchronous reset
-input logic  [5:0] in_symb_i,   //incoming NOT CODED letter, each letter is coded by its serial number
-output logic [5:0] out_symb_o   //outcoming CODED letter, each letter is coded by its serial number
+input logic  [6:0] in_symb_i,   //incoming NOT CODED letter, each letter is coded by its serial number
+output logic [6:0] out_symb_o   //outcoming CODED letter, each letter is coded by its serial number
 );
 
 //in-logic of ALL blocks (dominoes principal)
-logic [5:0] r1;
-logic [5:0] r2;
-logic [5:0] r3;
+logic [6:0] r1;
+logic [6:0] r2;
+logic [6:0] r3;
 
-logic signed [5:0] r1_presymb_i;
-logic signed [5:0] r1_symb_i;
-logic signed [5:0] r1_symb_o;
-logic signed [5:0] r1_prebacksymb_i;
-logic signed [5:0] r1_backsymb_i;
-logic signed [5:0] r1_backsymb_o;
+logic signed [6:0] in_r1_presymb;
+logic signed [6:0] in_r1_symb;
+logic signed [6:0] out_r1_symb;
+logic signed [6:0] in_r1_prebacksymb;
+logic signed [6:0] in_r1_backsymb;
+logic signed [6:0] out_r1_backsymb;
 
-logic signed [5:0] r2_presymb_i;
-logic signed [5:0] r2_symb_i;
-logic signed [5:0] r2_symb_o;
-logic signed [5:0] r2_prebacksymb_i;
-logic signed [5:0] r2_backsymb_i;
-logic signed [5:0] r2_backsymb_o;
+logic signed [6:0] in_r2_presymb;
+logic signed [6:0] in_r2_symb;
+logic signed [6:0] out_r2_symb;
+logic signed [6:0] in_r2_prebacksymb;
+logic signed [6:0] in_r2_backsymb;
+logic signed [6:0] out_r2_backsymb;
 
-logic signed [5:0] r3_presymb_i;
-logic signed [5:0] r3_symb_i;
-logic signed [5:0] r3_symb_o;
-logic signed [5:0] r3_backsymb_i;
-logic signed [5:0] r3_backsymb_o;
+logic signed [6:0] in_r3_presymb;
+logic signed [6:0] in_r3_symb;
+logic signed [6:0] out_r3_symb;
+logic signed [6:0] in_r3_backsymb;
+logic signed [6:0] out_r3_backsymb;
 
-logic signed [5:0] out_presymb_o;
+logic signed [6:0] out_presymb;
 
-logic signed [5:0] abs1;
-logic signed [5:0] abs2;
-logic signed [5:0] abs3;
-logic signed [5:0] abs4;
-logic signed [5:0] abs5;
-logic signed [5:0] abs6;
+logic signed [6:0] abs1;
+logic signed [6:0] abs2;
+logic signed [6:0] abs3;
+logic signed [6:0] abs4;
+logic signed [6:0] abs5;
+logic signed [6:0] abs6;
 
 //GATE BLOCK INPUT AND OUTPUT OF THE MACHINE
 //gate incoming symbol addition operation (G + R1); (trigger is needed for r1 counter's trigger delay compensation)
 
-assign r1_presymb_i = in_symb_i + r1;
+assign in_r1_presymb = in_symb_i + r1;
 
 always_ff @ (posedge clk_i or negedge rst_i)
 begin
   if ( !rst_i )
-    r1_symb_i <= 0;
+    in_r1_symb <= 0;
   else if ( (in_symb_i > 0) && (in_symb_i < 27) )
     begin
-      if ( r1_presymb_i < 1 )
+      if ( in_r1_presymb < 1 )
         begin
-        abs1 = r1_presymb_i + 26;
+        abs1 = in_r1_presymb + 26;
           if ( abs1 > 0 )
-            r1_symb_i = abs1;
+            in_r1_symb = abs1;
           else if ( abs1 < 0 )
-            r1_symb_i = 0 - abs1;
+            in_r1_symb = 0 - abs1;
         end
-      else if ( r1_presymb_i > 26 )
-        r1_symb_i <= r1_presymb_i - 26;
+      else if ( in_r1_presymb > 26 )
+        in_r1_symb <= in_r1_presymb - 26;
       else 
-        r1_symb_i <= r1_presymb_i;
+        in_r1_symb <= in_r1_presymb;
     end
 end
 
 //gate outcoming symbol subtraction operation (R1I - R1)
 
-assign out_presymb_o = r1_backsymb_o - (r1 - 1);
+assign out_presymb = out_r1_backsymb - (r1 - 1);
 
 always_comb
 begin
-  if ( (r1_backsymb_o > 0) && (r1_backsymb_o < 27) )
+  if ( (out_r1_backsymb > 0) && (out_r1_backsymb < 27) )
     begin
-      if ( out_presymb_o < 1 )
+      if ( out_presymb < 1 )
         begin
-        abs2 = out_presymb_o + 26;
+        abs2 = out_presymb + 26;
           if ( abs2 > 0 )
             out_symb_o = abs2;
           else if ( abs2 < 0 )
             out_symb_o = 0 - abs2;
         end
-      else if ( out_presymb_o > 26 )
-        out_symb_o = out_presymb_o - 26;
+      else if ( out_presymb > 26 )
+        out_symb_o = out_presymb - 26;
       else
-        out_symb_o = out_presymb_o;
+        out_symb_o = out_presymb;
     end
 end
 
@@ -112,110 +112,110 @@ end
 //special rotor I action
 always_comb
 begin
-  case ( r1_symb_i[4:0] )
-    5'd1    : r1_symb_o = 5'd2;
-    5'd2    : r1_symb_o = 5'd4;
-    5'd3    : r1_symb_o = 5'd6;
-    5'd4    : r1_symb_o = 5'd8;
-    5'd5    : r1_symb_o = 5'd10;
-    5'd6    : r1_symb_o = 5'd12;
-    5'd7    : r1_symb_o = 5'd3;
-    5'd8    : r1_symb_o = 5'd16;
-    5'd9    : r1_symb_o = 5'd18;
-    5'd10   : r1_symb_o = 5'd20;
-    5'd11   : r1_symb_o = 5'd24;
-    5'd12   : r1_symb_o = 5'd22;
-    5'd13   : r1_symb_o = 5'd26;
-    5'd14   : r1_symb_o = 5'd14;
-    5'd15   : r1_symb_o = 5'd25;
-    5'd16   : r1_symb_o = 5'd5;
-    5'd17   : r1_symb_o = 5'd9;
-    5'd18   : r1_symb_o = 5'd23;
-    5'd19   : r1_symb_o = 5'd7;
-    5'd20   : r1_symb_o = 5'd1;
-    5'd21   : r1_symb_o = 5'd11;
-    5'd22   : r1_symb_o = 5'd13;
-    5'd23   : r1_symb_o = 5'd21;
-    5'd24   : r1_symb_o = 5'd19;
-    5'd25   : r1_symb_o = 5'd17;
-    5'd26   : r1_symb_o = 5'd15;
-    default : r1_symb_o = 5'd0;
+  case ( in_r1_symb[4:0] )
+    7'd1    : out_r1_symb = 7'd2;
+    7'd2    : out_r1_symb = 7'd4;
+    7'd3    : out_r1_symb = 7'd6;
+    7'd4    : out_r1_symb = 7'd8;
+    7'd5    : out_r1_symb = 7'd10;
+    7'd6    : out_r1_symb = 7'd12;
+    7'd7    : out_r1_symb = 7'd3;
+    7'd8    : out_r1_symb = 7'd16;
+    7'd9    : out_r1_symb = 7'd18;
+    7'd10   : out_r1_symb = 7'd20;
+    7'd11   : out_r1_symb = 7'd24;
+    7'd12   : out_r1_symb = 7'd22;
+    7'd13   : out_r1_symb = 7'd26;
+    7'd14   : out_r1_symb = 7'd14;
+    7'd15   : out_r1_symb = 7'd25;
+    7'd16   : out_r1_symb = 7'd5;
+    7'd17   : out_r1_symb = 7'd9;
+    7'd18   : out_r1_symb = 7'd23;
+    7'd19   : out_r1_symb = 7'd7;
+    7'd20   : out_r1_symb = 7'd1;
+    7'd21   : out_r1_symb = 7'd11;
+    7'd22   : out_r1_symb = 7'd13;
+    7'd23   : out_r1_symb = 7'd21;
+    7'd24   : out_r1_symb = 7'd19;
+    7'd25   : out_r1_symb = 7'd17;
+    7'd26   : out_r1_symb = 7'd15;
+    default : out_r1_symb = 7'd0;
   endcase
 end
 
-assign r2_presymb_i = r1_symb_o + (r2 - r1);
+assign in_r2_presymb = out_r1_symb + (r2 - r1);
 
 always_comb
 begin
-  if ( (r1_symb_o > 0) && (r1_symb_o < 27) )
+  if ( (out_r1_symb > 0) && (out_r1_symb < 27) )
     begin
-      if ( r2_presymb_i < 1 )
+      if ( in_r2_presymb < 1 )
         begin
-        abs3 = r2_presymb_i + 26;
+        abs3 = in_r2_presymb + 26;
           if ( abs3 > 0 )
-            r2_symb_i = abs3;
+            in_r2_symb = abs3;
           else if ( abs3 < 0 )
-            r2_symb_i = 0 - abs3;
+            in_r2_symb = 0 - abs3;
         end
-      else if ( r2_presymb_i > 26 )
-        r2_symb_i = r2_presymb_i - 26;
+      else if ( in_r2_presymb > 26 )
+        in_r2_symb = in_r2_presymb - 26;
       else
-        r2_symb_i = r2_presymb_i;
+        in_r2_symb = in_r2_presymb;
     end
 end
 
-assign r1_prebacksymb_i = r2_backsymb_o - (r2 - r1);
+assign in_r1_prebacksymb = out_r2_backsymb - (r2 - r1);
 
 always_comb
 begin
-  if ( (r2_backsymb_o > 0) && (r2_backsymb_o < 27) )
+  if ( (out_r2_backsymb > 0) && (out_r2_backsymb < 27) )
     begin
-      if ( r1_prebacksymb_i < 1 )
+      if ( in_r1_prebacksymb < 1 )
         begin
-        abs4 = r1_prebacksymb_i + 26;
+        abs4 = in_r1_prebacksymb + 26;
           if ( abs4 > 0 )
-            r1_backsymb_i = abs4;
+            in_r1_backsymb = abs4;
           else if ( abs4 < 0 )
-            r1_backsymb_i = 0 - abs4;
+            in_r1_backsymb = 0 - abs4;
         end
-      else if ( r1_prebacksymb_i > 26 )
-        r1_backsymb_i = r1_prebacksymb_i - 26;
+      else if ( in_r1_prebacksymb > 26 )
+        in_r1_backsymb = in_r1_prebacksymb - 26;
       else 
-        r1_backsymb_i = r1_prebacksymb_i;
+        in_r1_backsymb = in_r1_prebacksymb;
     end
 end
 
 //special rotor I REVERSE action
 always_comb
 begin
-  case ( r1_backsymb_i[4:0] )
-    5'd1    : r1_backsymb_o = 5'd20;
-    5'd2    : r1_backsymb_o = 5'd1;
-    5'd3    : r1_backsymb_o = 5'd7;
-    5'd4    : r1_backsymb_o = 5'd2;
-    5'd5    : r1_backsymb_o = 5'd16;
-    5'd6    : r1_backsymb_o = 5'd3;
-    5'd7    : r1_backsymb_o = 5'd19;
-    5'd8    : r1_backsymb_o = 5'd4;
-    5'd9    : r1_backsymb_o = 5'd17;
-    5'd10   : r1_backsymb_o = 5'd5;
-    5'd11   : r1_backsymb_o = 5'd21;
-    5'd12   : r1_backsymb_o = 5'd6;
-    5'd13   : r1_backsymb_o = 5'd22;
-    5'd14   : r1_backsymb_o = 5'd14;
-    5'd15   : r1_backsymb_o = 5'd26;
-    5'd16   : r1_backsymb_o = 5'd8;
-    5'd17   : r1_backsymb_o = 5'd25;
-    5'd18   : r1_backsymb_o = 5'd9;
-    5'd19   : r1_backsymb_o = 5'd24;
-    5'd20   : r1_backsymb_o = 5'd10;
-    5'd21   : r1_backsymb_o = 5'd23;
-    5'd22   : r1_backsymb_o = 5'd12;
-    5'd23   : r1_backsymb_o = 5'd18;
-    5'd24   : r1_backsymb_o = 5'd11;
-    5'd25   : r1_backsymb_o = 5'd15;
-    5'd26   : r1_backsymb_o = 5'd13;
-    default : r1_backsymb_o = 5'd0;
+  case ( in_r1_backsymb[4:0] )
+    7'd1    : out_r1_backsymb = 7'd20;
+    7'd2    : out_r1_backsymb = 7'd1;
+    7'd3    : out_r1_backsymb = 7'd7;
+    7'd4    : out_r1_backsymb = 7'd2;
+    7'd5    : out_r1_backsymb = 7'd16;
+    7'd6    : out_r1_backsymb = 7'd3;
+    7'd7    : out_r1_backsymb = 7'd19;
+    7'd8    : out_r1_backsymb = 7'd4;
+    7'd9    : out_r1_backsymb = 7'd17;
+    7'd10   : out_r1_backsymb = 7'd5;
+    7'd11   : out_r1_backsymb = 7'd21;
+    7'd12   : out_r1_backsymb = 7'd6;
+    7'd13   : out_r1_backsymb = 7'd22;
+    7'd14   : out_r1_backsymb = 7'd14;
+    7'd15   : out_r1_backsymb = 7'd26;
+    7'd16   : out_r1_backsymb = 7'd8;
+    7'd17   : out_r1_backsymb = 7'd25;
+    7'd18   : out_r1_backsymb = 7'd9;
+    7'd19   : out_r1_backsymb = 7'd24;
+    7'd20   : out_r1_backsymb = 7'd10;
+    7'd21   : out_r1_backsymb = 7'd23;
+    7'd22   : out_r1_backsymb = 7'd12;
+    7'd23   : out_r1_backsymb = 7'd18;
+    7'd24   : out_r1_backsymb = 7'd11;
+    7'd25   : out_r1_backsymb = 7'd15;
+    7'd26   : out_r1_backsymb = 7'd13;
+    default : out_r1_backsymb = 7'd0;
   endcase
 end
 
@@ -235,110 +235,110 @@ end
 //special rotor II action
 always_comb
 begin
-  case ( r2_symb_i[4:0] )
-    5'd1    : r2_symb_o = 5'd1;
-    5'd2    : r2_symb_o = 5'd10;
-    5'd3    : r2_symb_o = 5'd4;
-    5'd4    : r2_symb_o = 5'd11;
-    5'd5    : r2_symb_o = 5'd19;
-    5'd6    : r2_symb_o = 5'd9;
-    5'd7    : r2_symb_o = 5'd18;
-    5'd8    : r2_symb_o = 5'd21;
-    5'd9    : r2_symb_o = 5'd24;
-    5'd10   : r2_symb_o = 5'd2;
-    5'd11   : r2_symb_o = 5'd12;
-    5'd12   : r2_symb_o = 5'd8;
-    5'd13   : r2_symb_o = 5'd23;
-    5'd14   : r2_symb_o = 5'd20;
-    5'd15   : r2_symb_o = 5'd13;
-    5'd16   : r2_symb_o = 5'd3;
-    5'd17   : r2_symb_o = 5'd17;
-    5'd18   : r2_symb_o = 5'd7;
-    5'd19   : r2_symb_o = 5'd26;
-    5'd20   : r2_symb_o = 5'd14;
-    5'd21   : r2_symb_o = 5'd16;
-    5'd22   : r2_symb_o = 5'd25;
-    5'd23   : r2_symb_o = 5'd6;
-    5'd24   : r2_symb_o = 5'd22;
-    5'd25   : r2_symb_o = 5'd15;
-    5'd26   : r2_symb_o = 5'd5;
-    default : r2_symb_o = 5'd0; 
+  case ( in_r2_symb[4:0] )
+    7'd1    : out_r2_symb = 7'd1;
+    7'd2    : out_r2_symb = 7'd10;
+    7'd3    : out_r2_symb = 7'd4;
+    7'd4    : out_r2_symb = 7'd11;
+    7'd5    : out_r2_symb = 7'd19;
+    7'd6    : out_r2_symb = 7'd9;
+    7'd7    : out_r2_symb = 7'd18;
+    7'd8    : out_r2_symb = 7'd21;
+    7'd9    : out_r2_symb = 7'd24;
+    7'd10   : out_r2_symb = 7'd2;
+    7'd11   : out_r2_symb = 7'd12;
+    7'd12   : out_r2_symb = 7'd8;
+    7'd13   : out_r2_symb = 7'd23;
+    7'd14   : out_r2_symb = 7'd20;
+    7'd15   : out_r2_symb = 7'd13;
+    7'd16   : out_r2_symb = 7'd3;
+    7'd17   : out_r2_symb = 7'd17;
+    7'd18   : out_r2_symb = 7'd7;
+    7'd19   : out_r2_symb = 7'd26;
+    7'd20   : out_r2_symb = 7'd14;
+    7'd21   : out_r2_symb = 7'd16;
+    7'd22   : out_r2_symb = 7'd25;
+    7'd23   : out_r2_symb = 7'd6;
+    7'd24   : out_r2_symb = 7'd22;
+    7'd25   : out_r2_symb = 7'd15;
+    7'd26   : out_r2_symb = 7'd5;
+    default : out_r2_symb = 7'd0; 
   endcase
 end
 
-assign r3_presymb_i = r2_symb_o + (r3 - r2);
+assign in_r3_presymb = out_r2_symb + (r3 - r2);
 
 always_comb
 begin
-  if ( (r2_symb_o > 0) && (r2_symb_o < 27) )
+  if ( (out_r2_symb > 0) && (out_r2_symb < 27) )
     begin
-      if ( r3_presymb_i < 1 )
+      if ( in_r3_presymb < 1 )
         begin
-        abs5 = r3_presymb_i + 26;
+        abs5 = in_r3_presymb + 26;
           if ( abs5 > 0 )
-            r3_symb_i = abs5;
+            in_r3_symb = abs5;
           else if ( abs5 < 0 )
-            r3_symb_i = 0 - abs5;
+            in_r3_symb = 0 - abs5;
         end
-      else if ( r3_presymb_i > 26 )
-        r3_symb_i = r3_presymb_i - 26;
+      else if ( in_r3_presymb > 26 )
+        in_r3_symb = in_r3_presymb - 26;
       else
-        r3_symb_i = r3_presymb_i;
+        in_r3_symb = in_r3_presymb;
     end
 end
 
-assign r2_prebacksymb_i = r3_backsymb_o - (r3 - r2);
+assign in_r2_prebacksymb = out_r3_backsymb - (r3 - r2);
 
 always_comb
 begin
-  if ( (r3_backsymb_o > 0) && (r3_backsymb_o < 27) )
+  if ( (out_r3_backsymb > 0) && (out_r3_backsymb < 27) )
     begin
-      if ( r2_prebacksymb_i < 1 )
+      if ( in_r2_prebacksymb < 1 )
         begin
-        abs6 = r2_prebacksymb_i + 26;
+        abs6 = in_r2_prebacksymb + 26;
           if ( abs6 > 0 )
-            r2_backsymb_i = abs6;
+            in_r2_backsymb = abs6;
           else if ( abs6 < 0 )
-            r2_backsymb_i = 0 - abs6;
+            in_r2_backsymb = 0 - abs6;
         end
-      else if ( r2_prebacksymb_i > 26 )
-        r2_backsymb_i = r2_prebacksymb_i - 26;
+      else if ( in_r2_prebacksymb > 26 )
+        in_r2_backsymb = in_r2_prebacksymb - 26;
       else
-        r2_backsymb_i = r2_prebacksymb_i;
+        in_r2_backsymb = in_r2_prebacksymb;
     end
 end
 
 //special rotor II REVERSE action
 always_comb
 begin
-  case ( r2_backsymb_i[4:0] )
-    5'd1    : r2_backsymb_o = 5'd1;
-    5'd2    : r2_backsymb_o = 5'd10;
-    5'd3    : r2_backsymb_o = 5'd16;
-    5'd4    : r2_backsymb_o = 5'd3;
-    5'd5    : r2_backsymb_o = 5'd26;
-    5'd6    : r2_backsymb_o = 5'd23;
-    5'd7    : r2_backsymb_o = 5'd18;
-    5'd8    : r2_backsymb_o = 5'd12;
-    5'd9    : r2_backsymb_o = 5'd6;
-    5'd10   : r2_backsymb_o = 5'd2;
-    5'd11   : r2_backsymb_o = 5'd4;
-    5'd12   : r2_backsymb_o = 5'd11;
-    5'd13   : r2_backsymb_o = 5'd15;
-    5'd14   : r2_backsymb_o = 5'd20;
-    5'd15   : r2_backsymb_o = 5'd25;
-    5'd16   : r2_backsymb_o = 5'd21;
-    5'd17   : r2_backsymb_o = 5'd17;
-    5'd18   : r2_backsymb_o = 5'd7;
-    5'd19   : r2_backsymb_o = 5'd5;
-    5'd20   : r2_backsymb_o = 5'd14;
-    5'd21   : r2_backsymb_o = 5'd8;
-    5'd22   : r2_backsymb_o = 5'd24;
-    5'd23   : r2_backsymb_o = 5'd13;
-    5'd24   : r2_backsymb_o = 5'd9;
-    5'd25   : r2_backsymb_o = 5'd22;
-    5'd26   : r2_backsymb_o = 5'd19;
-    default : r2_backsymb_o = 5'd0;
+  case ( in_r2_backsymb[4:0] )
+    7'd1    : out_r2_backsymb = 7'd1;
+    7'd2    : out_r2_backsymb = 7'd10;
+    7'd3    : out_r2_backsymb = 7'd16;
+    7'd4    : out_r2_backsymb = 7'd3;
+    7'd5    : out_r2_backsymb = 7'd26;
+    7'd6    : out_r2_backsymb = 7'd23;
+    7'd7    : out_r2_backsymb = 7'd18;
+    7'd8    : out_r2_backsymb = 7'd12;
+    7'd9    : out_r2_backsymb = 7'd6;
+    7'd10   : out_r2_backsymb = 7'd2;
+    7'd11   : out_r2_backsymb = 7'd4;
+    7'd12   : out_r2_backsymb = 7'd11;
+    7'd13   : out_r2_backsymb = 7'd15;
+    7'd14   : out_r2_backsymb = 7'd20;
+    7'd15   : out_r2_backsymb = 7'd25;
+    7'd16   : out_r2_backsymb = 7'd21;
+    7'd17   : out_r2_backsymb = 7'd17;
+    7'd18   : out_r2_backsymb = 7'd7;
+    7'd19   : out_r2_backsymb = 7'd5;
+    7'd20   : out_r2_backsymb = 7'd14;
+    7'd21   : out_r2_backsymb = 7'd8;
+    7'd22   : out_r2_backsymb = 7'd24;
+    7'd23   : out_r2_backsymb = 7'd13;
+    7'd24   : out_r2_backsymb = 7'd9;
+    7'd25   : out_r2_backsymb = 7'd22;
+    7'd26   : out_r2_backsymb = 7'd19;
+    default : out_r2_backsymb = 7'd0;
   endcase
 end
 
@@ -358,68 +358,68 @@ end
 //special rotor III action
 always_comb
 begin
-  case ( r3_symb_i[4:0] )
-    5'd1    : r3_symb_o = 5'd5;
-    5'd2    : r3_symb_o = 5'd11;
-    5'd3    : r3_symb_o = 5'd13;
-    5'd4    : r3_symb_o = 5'd6;
-    5'd5    : r3_symb_o = 5'd12;
-    5'd6    : r3_symb_o = 5'd7;
-    5'd7    : r3_symb_o = 5'd4;
-    5'd8    : r3_symb_o = 5'd17;
-    5'd9    : r3_symb_o = 5'd22;
-    5'd10   : r3_symb_o = 5'd26;
-    5'd11   : r3_symb_o = 5'd14;
-    5'd12   : r3_symb_o = 5'd20;
-    5'd13   : r3_symb_o = 5'd15;
-    5'd14   : r3_symb_o = 5'd23;
-    5'd15   : r3_symb_o = 5'd25;
-    5'd16   : r3_symb_o = 5'd8;
-    5'd17   : r3_symb_o = 5'd24;
-    5'd18   : r3_symb_o = 5'd21;
-    5'd19   : r3_symb_o = 5'd19;
-    5'd20   : r3_symb_o = 5'd16;
-    5'd21   : r3_symb_o = 5'd1;
-    5'd22   : r3_symb_o = 5'd9;
-    5'd23   : r3_symb_o = 5'd2;
-    5'd24   : r3_symb_o = 5'd18;
-    5'd25   : r3_symb_o = 5'd3;
-    5'd26   : r3_symb_o = 5'd10;
-    default : r3_symb_o = 5'd0;
+  case ( in_r3_symb[4:0] )
+    7'd1    : out_r3_symb = 7'd5;
+    7'd2    : out_r3_symb = 7'd11;
+    7'd3    : out_r3_symb = 7'd13;
+    7'd4    : out_r3_symb = 7'd6;
+    7'd5    : out_r3_symb = 7'd12;
+    7'd6    : out_r3_symb = 7'd7;
+    7'd7    : out_r3_symb = 7'd4;
+    7'd8    : out_r3_symb = 7'd17;
+    7'd9    : out_r3_symb = 7'd22;
+    7'd10   : out_r3_symb = 7'd26;
+    7'd11   : out_r3_symb = 7'd14;
+    7'd12   : out_r3_symb = 7'd20;
+    7'd13   : out_r3_symb = 7'd15;
+    7'd14   : out_r3_symb = 7'd23;
+    7'd15   : out_r3_symb = 7'd25;
+    7'd16   : out_r3_symb = 7'd8;
+    7'd17   : out_r3_symb = 7'd24;
+    7'd18   : out_r3_symb = 7'd21;
+    7'd19   : out_r3_symb = 7'd19;
+    7'd20   : out_r3_symb = 7'd16;
+    7'd21   : out_r3_symb = 7'd1;
+    7'd22   : out_r3_symb = 7'd9;
+    7'd23   : out_r3_symb = 7'd2;
+    7'd24   : out_r3_symb = 7'd18;
+    7'd25   : out_r3_symb = 7'd3;
+    7'd26   : out_r3_symb = 7'd10;
+    default : out_r3_symb = 7'd0;
   endcase
 end
 
 //special rotor III REVERSE action
 always_comb
 begin
-  case ( r3_backsymb_i[4:0] )
-    5'd1    : r3_backsymb_o = 5'd21;
-    5'd2    : r3_backsymb_o = 5'd23;
-    5'd3    : r3_backsymb_o = 5'd25;
-    5'd4    : r3_backsymb_o = 5'd7;
-    5'd5    : r3_backsymb_o = 5'd1;
-    5'd6    : r3_backsymb_o = 5'd4;
-    5'd7    : r3_backsymb_o = 5'd6;
-    5'd8    : r3_backsymb_o = 5'd16;
-    5'd9    : r3_backsymb_o = 5'd22;
-    5'd10   : r3_backsymb_o = 5'd26;
-    5'd11   : r3_backsymb_o = 5'd2;
-    5'd12   : r3_backsymb_o = 5'd5;
-    5'd13   : r3_backsymb_o = 5'd3;
-    5'd14   : r3_backsymb_o = 5'd11;
-    5'd15   : r3_backsymb_o = 5'd13;
-    5'd16   : r3_backsymb_o = 5'd20;
-    5'd17   : r3_backsymb_o = 5'd8;
-    5'd18   : r3_backsymb_o = 5'd24;
-    5'd19   : r3_backsymb_o = 5'd19;
-    5'd20   : r3_backsymb_o = 5'd12;
-    5'd21   : r3_backsymb_o = 5'd18;
-    5'd22   : r3_backsymb_o = 5'd9;
-    5'd23   : r3_backsymb_o = 5'd14;
-    5'd24   : r3_backsymb_o = 5'd17;
-    5'd25   : r3_backsymb_o = 5'd15;
-    5'd26   : r3_backsymb_o = 5'd10;
-    default : r3_backsymb_o = 5'd0;
+  case ( in_r3_backsymb[4:0] )
+    7'd1    : out_r3_backsymb = 7'd21;
+    7'd2    : out_r3_backsymb = 7'd23;
+    7'd3    : out_r3_backsymb = 7'd25;
+    7'd4    : out_r3_backsymb = 7'd7;
+    7'd5    : out_r3_backsymb = 7'd1;
+    7'd6    : out_r3_backsymb = 7'd4;
+    7'd7    : out_r3_backsymb = 7'd6;
+    7'd8    : out_r3_backsymb = 7'd16;
+    7'd9    : out_r3_backsymb = 7'd22;
+    7'd10   : out_r3_backsymb = 7'd26;
+    7'd11   : out_r3_backsymb = 7'd2;
+    7'd12   : out_r3_backsymb = 7'd5;
+    7'd13   : out_r3_backsymb = 7'd3;
+    7'd14   : out_r3_backsymb = 7'd11;
+    7'd15   : out_r3_backsymb = 7'd13;
+    7'd16   : out_r3_backsymb = 7'd20;
+    7'd17   : out_r3_backsymb = 7'd8;
+    7'd18   : out_r3_backsymb = 7'd24;
+    7'd19   : out_r3_backsymb = 7'd19;
+    7'd20   : out_r3_backsymb = 7'd12;
+    7'd21   : out_r3_backsymb = 7'd18;
+    7'd22   : out_r3_backsymb = 7'd9;
+    7'd23   : out_r3_backsymb = 7'd14;
+    7'd24   : out_r3_backsymb = 7'd17;
+    7'd25   : out_r3_backsymb = 7'd15;
+    7'd26   : out_r3_backsymb = 7'd10;
+    default : out_r3_backsymb = 7'd0;
   endcase
 end
 
@@ -427,34 +427,34 @@ end
 //special reflector action
 always_comb
 begin
-  case ( r3_symb_o[4:0] )
-    5'd1    : r3_backsymb_i = 5'd25;
-    5'd2    : r3_backsymb_i = 5'd18;
-    5'd3    : r3_backsymb_i = 5'd21;
-    5'd4    : r3_backsymb_i = 5'd8;
-    5'd5    : r3_backsymb_i = 5'd17;
-    5'd6    : r3_backsymb_i = 5'd19;
-    5'd7    : r3_backsymb_i = 5'd12;
-    5'd8    : r3_backsymb_i = 5'd4;
-    5'd9    : r3_backsymb_i = 5'd16;
-    5'd10   : r3_backsymb_i = 5'd24;
-    5'd11   : r3_backsymb_i = 5'd14;
-    5'd12   : r3_backsymb_i = 5'd7;
-    5'd13   : r3_backsymb_i = 5'd15;
-    5'd14   : r3_backsymb_i = 5'd11;
-    5'd15   : r3_backsymb_i = 5'd13;
-    5'd16   : r3_backsymb_i = 5'd9;
-    5'd17   : r3_backsymb_i = 5'd5;
-    5'd18   : r3_backsymb_i = 5'd2;
-    5'd19   : r3_backsymb_i = 5'd6;
-    5'd20   : r3_backsymb_i = 5'd26;
-    5'd21   : r3_backsymb_i = 5'd3;
-    5'd22   : r3_backsymb_i = 5'd23;
-    5'd23   : r3_backsymb_i = 5'd22;
-    5'd24   : r3_backsymb_i = 5'd10;
-    5'd25   : r3_backsymb_i = 5'd1;
-    5'd26   : r3_backsymb_i = 5'd20;
-    default : r3_backsymb_i = 5'd0;
+  case ( out_r3_symb[4:0] )
+    7'd1    : in_r3_backsymb = 7'd25;
+    7'd2    : in_r3_backsymb = 7'd18;
+    7'd3    : in_r3_backsymb = 7'd21;
+    7'd4    : in_r3_backsymb = 7'd8;
+    7'd5    : in_r3_backsymb = 7'd17;
+    7'd6    : in_r3_backsymb = 7'd19;
+    7'd7    : in_r3_backsymb = 7'd12;
+    7'd8    : in_r3_backsymb = 7'd4;
+    7'd9    : in_r3_backsymb = 7'd16;
+    7'd10   : in_r3_backsymb = 7'd24;
+    7'd11   : in_r3_backsymb = 7'd14;
+    7'd12   : in_r3_backsymb = 7'd7;
+    7'd13   : in_r3_backsymb = 7'd15;
+    7'd14   : in_r3_backsymb = 7'd11;
+    7'd15   : in_r3_backsymb = 7'd13;
+    7'd16   : in_r3_backsymb = 7'd9;
+    7'd17   : in_r3_backsymb = 7'd5;
+    7'd18   : in_r3_backsymb = 7'd2;
+    7'd19   : in_r3_backsymb = 7'd6;
+    7'd20   : in_r3_backsymb = 7'd26;
+    7'd21   : in_r3_backsymb = 7'd3;
+    7'd22   : in_r3_backsymb = 7'd23;
+    7'd23   : in_r3_backsymb = 7'd22;
+    7'd24   : in_r3_backsymb = 7'd10;
+    7'd25   : in_r3_backsymb = 7'd1;
+    7'd26   : in_r3_backsymb = 7'd20;
+    default : in_r3_backsymb = 7'd0;
   endcase
 end
 

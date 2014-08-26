@@ -143,7 +143,7 @@ begin
     r3 <= R3_PAR;
   else if ( r3 == 26 )
     r3 <= 0;
-  else if ( r3 == 26 )
+  else if ( r2 == 26 )
     r3 <= r3 + 1;
 end
 

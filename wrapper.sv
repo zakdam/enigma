@@ -1,14 +1,14 @@
 module wrapper
   
 (
-input logic               clk_i,
-input logic               rst_i,
-input logic         [7:0] symb_numb_i,    //number of symbols that will be encoded
-input logic         [6:0] wrap_i,         //wrapper input 
-input logic  signed [6:0] out_en_i,       //receiving encoded symbol from enigma
+  input logic               clk_i,
+  input logic               rst_i,
+  input logic         [7:0] symb_numb_i,    //number of symbols that will be encoded
+  input logic         [6:0] wrap_i,         //wrapper input 
+  input logic  signed [6:0] out_en_i,       //receiving encoded symbol from enigma
 
-output logic signed [6:0] wrap_o,         //wrapper output
-output logic signed [6:0] in_en_o         //generating incoming symbol for enigma
+  output logic signed [6:0] wrap_o,         //wrapper output  
+  output logic signed [6:0] in_en_o         //generating incoming symbol for enigma
 );
 
 //input memory variables and buses

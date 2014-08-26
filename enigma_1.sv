@@ -1,5 +1,5 @@
 module enigma_1
-
+ 
 #(
 	parameter R1_PAR = 1,
 	parameter R2_PAR = 1,

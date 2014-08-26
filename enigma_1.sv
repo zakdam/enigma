@@ -1,16 +1,16 @@
 module enigma_1
- 
+
 #(
-	parameter R1_PAR = 1,
-	parameter R2_PAR = 1,
-	parameter R3_PAR = 1
+  parameter R1_PAR = 1,
+  parameter R2_PAR = 1,
+  parameter R3_PAR = 1
 )
 
 (
-	input logic        clk_i,       //synchrosignal
-	input logic        rst_i,       //asynchronous reset
-	input logic  [6:0] in_symb_i,   //incoming NOT CODED letter, each letter is coded by its serial number
-	output logic [6:0] out_symb_o   //outcoming CODED letter, each letter is coded by its serial number
+  input logic        clk_i,       //synchrosignal
+  input logic        rst_i,       //asynchronous reset
+  input logic  [6:0] in_symb_i,   //incoming NOT CODED letter, each letter is coded by its serial number
+  output logic [6:0] out_symb_o   //outcoming CODED letter, each letter is coded by its serial number
 );
 
 //in-logic of ALL blocks (dominoes principal)
@@ -57,20 +57,20 @@ logic signed [6:0] refl_array [0:26] = '{ 0,25,18,21,8,17,19,12,4,16,24,14,7,15,
 //calculating symbol function
 function signed [6:0] symb_calc(input logic signed [6:0] a);
 logic signed [6:0] abs;
-	begin
-		if ( a < 1 )
-			begin
-				abs = a + 26;
-				if ( abs > 0 )
-					return abs;
-				else if ( abs < 0 )
-					return 0 - abs;
-			end
-		else if ( a > 26 )
-			return a - 26;
-		else 
-			return a;
-	end
+  begin
+    if ( a < 1 )
+      begin
+        abs = a + 26;
+          if ( abs > 0 )
+            return abs;
+          else if ( abs < 0 )
+            return 0 - abs;
+      end
+    else if ( a > 26 )
+      return a - 26;
+    else 
+      return a;
+  end
 endfunction	
 
 //GATE BLOCK INPUT AND OUTPUT OF THE MACHINE
@@ -82,7 +82,7 @@ begin
   if ( !rst_i )
     in_r1_symb <= 0;
   else if ( (in_symb_i > 0) && (in_symb_i < 27) )
-		in_r1_symb <= symb_calc(in_r1_presymb);
+    in_r1_symb <= symb_calc(in_r1_presymb);
 end
 
 assign out_presymb = out_r1_backsymb - (r1 - 1);

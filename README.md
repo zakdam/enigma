@@ -1,4 +1,0 @@
-enigma
-======
-
-Enigma cryptographic machine

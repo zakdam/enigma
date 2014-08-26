@@ -79,24 +79,20 @@ initial
   end
 
 enigma_1 eg(
-.clk_i          (clk_i),
-.rst_i          (rst_i),
-
-.in_symb_i      (trans1),
-
-.out_symb_o     (trans2)
+  .clk_i          (clk_i),
+  .rst_i          (rst_i),
+  .in_symb_i      (trans1),
+  .out_symb_o     (trans2)
 );
 
 wrapper wp(
-.clk_i          (clk_i),
-.rst_i          (rst_i),
-
-.symb_numb_i    (symb_numb_i),
-.wrap_i         (wrap_i),
-.out_en_i       (trans2),
-
-.wrap_o         (wrap_o),
-.in_en_o        (trans1)
+  .clk_i          (clk_i),
+  .rst_i          (rst_i),
+  .symb_numb_i    (symb_numb_i),
+  .wrap_i         (wrap_i),
+  .out_en_i       (trans2),
+  .wrap_o         (wrap_o),
+  .in_en_o        (trans1)
 );
 
 endmodule

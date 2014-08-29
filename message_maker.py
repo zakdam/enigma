@@ -14,4 +14,4 @@ for i in range(0, length):
 	numb = list_r[i]
 	outp = chr(96 + int(numb, 2))
 	
-	txt_w.write(outp)		
+	txt_w.write(outp)		 

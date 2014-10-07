@@ -1,16 +1,16 @@
 module project_tb;
 
 //input ports
-  logic              clk_i;
-  logic              rst_i;
-  logic              symb_val_i;
-  logic              rrs_rst_i;
-  logic        [7:0] symb_numb_i;
-  logic signed [6:0] symbol_i;
+  logic              clk;
+  logic              rst;
+  logic              symb_val;
+  logic              rotors_rst;
+  logic        [7:0] symb_numb;
+  logic signed [6:0] symbol;
 
 //output ports
-  logic              symb_val_o;
-  logic signed [6:0] symbol_o;
+  logic              symb_val;
+  logic signed [6:0] symbol;
 
 	integer i;
   integer j;
@@ -22,60 +22,63 @@ module project_tb;
 //clock
 initial                               
   begin
-    clk_i = 1'b0;
+    clk = 1'b0;
     forever
       begin
-        #10.0 clk_i = ~clk_i;
+        #10.0 clk <= ~clk;
       end
   end
   
 //reset  
 initial                               
   begin
-    rst_i = 1'b0;
+    rst = 1'b1;
     #10;
-    rst_i = 1'b1;
+    rst <= 1'b0;
   end
 
 //only rotors reset  
 initial                               
   begin
-    rrs_rst_i = 1'b0;
+    rotors_rst = 1'b0;
     #10;
-    rrs_rst_i = 1'b1;
+    rotors_rst <= 1'b1;
   end
 
 //incoming symbol is valid
 initial
   begin
-    symb_val_i = 1'b0;
-    @( posedge clk_i );
-    @( posedge clk_i );
-    symb_val_i = 1'b1;
-    #2010;
-    @( posedge clk_i );
-    symb_val_i = 1'b0;
+    symb_val = 1'b0;
+    @( posedge clk );
+    @( posedge clk );
+    symb_val <= 1'b1;
+    repeat( 101 )
+      begin
+        @( posedge clk );
+      end
+    //#2010;
+    //@( posedge clk_i );
+    symb_val <= 1'b0;
   end
 
 //symbols' number
 initial
   begin
-    symb_numb_i = 8'd100;
+    symb_numb = 8'd100;
   end
 
 //reading from file to memory (reading file to wrapper input memory)
 initial 
   begin
-    symbol_i = 0;
-    @( posedge clk_i );
-    @( posedge clk_i );
+    symbol = 0;
+    @( posedge clk );
+    @( posedge clk );
     $readmemb( "in_file.txt", def_mem );
-    for ( i = 0; i <= symb_numb_i; i = i + 1 )                      
+    for( i = 0; i <= symb_numb_i; i = i + 1 )                      
       begin
-        symbol_i = 0;
-        symbol_i = def_mem[i];
-        @( posedge clk_i );
-        symbol_i = 0;
+        symbol <= def_mem[i];
+        @( posedge clk );
+        symbol <= 0;
       end
   end
   
@@ -85,7 +88,7 @@ initial
     outfile = $fopen( "out_file.txt", "w" );
     j = 0;
       forever begin
-        #10 if ( symb_val_o )
+        #10 if( symb_val_o )
           begin
             j = j + 1;
             $fwrite ( outfile, "%b\t", symbol_o );
@@ -96,15 +99,15 @@ initial
   end
 
 enigma_top et(
-  .clk_i        ( clk_i       ),
-  .rst_i        ( rst_i       ),
-  .symb_val_i   ( symb_val_i  ),
-  .rrs_rst_i    ( rrs_rst_i   ),
-  .symb_numb_i  ( symb_numb_i ),
-  .symbol_i     ( symbol_i    ),
+  .clk_i         ( clk         ),
+  .rst_i         ( rst         ),
+  .symb_val_i    ( symb_val    ),
+  .rotors_rst_i  ( rotors_rst  ),
+  .symb_numb_i   ( symb_numb   ),
+  .symbol_i      ( symbol      ),
 
-  .symb_val_o   ( symb_val_o  ),
-  .symbol_o     ( symbol_o    )
+  .symb_val_o    ( symb_val    ),
+  .symbol_o      ( symbol      )
 );
 
 

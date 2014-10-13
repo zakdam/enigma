@@ -1,10 +1,10 @@
 module enigma_1
 #(
-  parameter  R1_INIT_VALUE  = 1,
-  parameter  R2_INIT_VALUE  = 1,
-  parameter  R3_INIT_VALUE  = 1,
+  parameter R1_INIT_VALUE  = 1,
+  parameter R2_INIT_VALUE  = 1,
+  parameter R3_INIT_VALUE  = 1,
 
-  localparam LETTERS = 26
+  parameter LETTERS = 26
 )
 
 (
@@ -13,25 +13,25 @@ module enigma_1
   input              rotors_rst_i,        // only rotors reset
 
   input        [6:0] in_symb_i,           // incoming NOT CODED letter, each letter is coded by its serial number
-  input              in_symb_val_i,       // incoming symbol is valid
+  input              en_val_i,       // incoming symbol is valid
+
+  // connecting rotors signals
+  input        [6:0] r1_i,
+  input   [5:1][6:0] r1_d_i,
+
+  input        [6:0] r2_i,
+  input   [4:1][6:0] r2_d_i,
+ 
+  input        [6:0] r3_i,
+  input   [3:1][6:0] r3_d_i,
 
   output logic [6:0] out_symb_o,          // outcoming CODED letter, each letter is coded by its serial number
-  output logic       out_symb_val_o       // outcoming encoded symbols are valid
+  output logic       encod_val_o       // outcoming encoded symbols are valid
 );
 
-// rotors states (rX_s) and delayed states (rX_s_d)
-logic      [6:0] r1_s;
-logic [5:1][6:0] r1_s_d;
-
-logic      [6:0] r2_s;
-logic [4:1][6:0] r2_s_d;
-
-logic      [6:0] r3_s;
-logic [3:1][6:0] r3_s_d;
-
-/*logic [5:0][6:0]   r1_s;                //0 - non-delayed, 1 - delayed for one stroke,...
-logic [4:0][6:0]   r2_s;                //same numeration
-logic [3:0][6:0]   r3_s;                //same numeration*/
+/*logic [5:0][6:0]   r1_i;                //0 - non-delayed, 1 - delayed for one stroke,...
+logic [4:0][6:0]   r2_i;                //same numeration
+logic [3:0][6:0]   r3_i;                //same numeration*/
 
 logic signed [5:0][6:0] r1_acts;
 
@@ -51,7 +51,7 @@ logic signed [6:0] r3_array_str  [0:LETTERS] = '{ 0,5,11,13,6,12,7,4,17,22,26,14
 logic signed [6:0] r3_array_back [0:LETTERS] = '{ 0,21,23,25,7,1,4,6,16,22,26,2,5,3,11,13,20,8,24,19,12,18,9,14,17,15,10 };
 logic signed [6:0] refl_array    [0:LETTERS] = '{ 0,25,18,21,8,17,19,12,4,16,24,14,7,15,11,13,9,5,2,6,26,3,23,22,10,1,20 };
   
-// triggers for delaying in_symb_val_i
+// triggers for delaying en_val_i
   logic        [5:0] en_val_i_d;
 
 // delaying en_val_o for 6 strokes
@@ -63,11 +63,11 @@ always_ff @( posedge clk_i or posedge rst_i )
       end
     else
       begin
-        en_val_i_d[0] <= in_symb_val_i;
+        en_val_i_d[0] <= en_val_i;
         for( int i = 1; i < 6; i++ )
           begin
             en_val_i_d[i] <= en_val_i_d[i-1];
-        /*en_val_i_d[0] <= in_symb_val_i;
+        /*en_val_i_d[0] <= en_val_i;
         en_val_i_d[1] <= en_val_i_d[0];
         en_val_i_d[2] <= en_val_i_d[1];
         en_val_i_d[3] <= en_val_i_d[2];
@@ -98,106 +98,10 @@ logic signed [6:0] abs;
   end
 endfunction
 
-// ROTOR I BLOCK
-// r1_s - rotor definition (counter)
-always_ff @( posedge clk_i or posedge rst_i or posedge rotors_rst_i )   
-  begin
-    if( rst_i )
-      r1_s <= R1_INIT_VALUE;
-    else
-      if( rotors_rst_i )
-        r1_s <= R1_INIT_VALUE;
-    else 
-      if( r1_s == LETTERS )
-        r1_s <= 7'd1;
-    else
-      if( in_symb_val_i ) 
-        r1_s <= r1_s + 6'd1;
-/*//start delaying
-      r1_s_d[1] <= r1_s;
-      r1_s_d[2] <= r1_s_d[1];
-      r1_s_d[3] <= r1_s_d[2];
-      r1_s_d[4] <= r1_s_d[3];
-      r1_s_d[5] <= r1_s_d[4];*/
-  end
-
-// r1_s_d delayed for N strokes
-always_ff @( posedge clk_i )
-  begin
-    r1_s_d[1] <= r1_s;
-    r1_s_d[2] <= r1_s_d[1];  
-    r1_s_d[3] <= r1_s_d[2];
-    r1_s_d[4] <= r1_s_d[3];
-    r1_s_d[5] <= r1_s_d[4];
-  end
-
-
-// ROTOR II BLOCK
-// r2_s - rotor definition (counter)
-always_ff @( posedge clk_i or posedge rst_i or posedge rotors_rst_i )
-  begin
-    if( rst_i )
-      r2_s <= R2_INIT_VALUE;
-    else 
-      if( rotors_rst_i )
-        r2_s <= R2_INIT_VALUE;
-    else 
-      if( r2_s == LETTERS )
-        r2_s <= 7'd1;
-    else 
-      if( r1_s == LETTERS )
-        r2_s <= r2_s + 7'd1;
-/*//start delaying
-      r2_s_d[1] <= r2_s;
-      r2_s_d[2] <= r2_s_d[1];
-      r2_s_d[3] <= r2_s_d[2];
-      r2_s_d[4] <= r2_s_d[3];*/
-  end
-
-// r2_s_d delayed for N strokes
-always_ff @( posedge clk_i )
-  begin
-    r2_s_d[1] <= r2_s;
-    r2_s_d[2] <= r2_s_d[1];
-    r2_s_d[3] <= r2_s_d[2];
-    r2_s_d[4] <= r2_s_d[3];
-  end
-
-
-// ROTOR III BLOCK
-// r3_s - rotor definition (counter)
-always_ff @( posedge clk_i or posedge rst_i or posedge rotors_rst_i)
-  begin
-    if( rst_i )
-      r3_s <= R3_INIT_VALUE;
-    else 
-      if( rotors_rst_i )
-        r3_s <= R3_INIT_VALUE;
-    else 
-      if( r3_s == LETTERS )
-        r3_s <= 7'd1;
-    else 
-      if( r3_s == LETTERS )
-        r3_s <= r3_s + 7'd1;
-/*//start delaying
-      r3_s_d[1] <= r3_s;
-      r3_s_d[2] <= r3_s_d[1];
-      r3_s_d[3] <= r3_s_d[2];*/
-  end
-
-// r3_s_d delayed for N strokes
-always_ff @( posedge clk_i )
-  begin
-    r3_s_d[1] <= r3_s;
-    r3_s_d[2] <= r3_s_d[1];
-    r3_s_d[3] <= r3_s_d[2];
-  end
-
-
 // rotor 1 straight movement
 always_comb
   begin
-    r1_acts[0] = in_symb_i + r1_s;
+    r1_acts[0] = in_symb_i + r1_i;
     r1_acts[1] = symb_calc( r1_acts[0] );
     r1_acts[2] = r1_array_str[r1_acts[1]];
   end
@@ -214,7 +118,7 @@ always_ff @( posedge clk_i or posedge rst_i )
 // rotor 2 straight movement
 always_comb
   begin
-    r2_acts[0] = result[0] + ( r2_s - r1_s );
+    r2_acts[0] = result[0] + ( r2_i - r1_i );
     r2_acts[1] = symb_calc( r2_acts[0] );
     r2_acts[2] = r2_array_str[r2_acts[1]];
   end
@@ -230,7 +134,7 @@ always_ff @( posedge clk_i or posedge rst_i )
 // rotor 3 straight movement
 always_comb
   begin
-    r3_acts[0] = result[1] + ( r3_s_d[1] - r2_s_d[1] );
+    r3_acts[0] = result[1] + ( r3_d_i[1] - r2_d_i[1] );
     r3_acts[1] = symb_calc( r3_acts[0] );
     r3_acts[2] = r3_array_str[r3_acts[1]];
   end
@@ -261,7 +165,7 @@ always_ff @( posedge clk_i or posedge rst_i )
 // rotor 2 back movement
 always_comb
   begin
-    r2_acts[3] = result[3] - ( r3_s_d[3] - r2_s_d[3] );	
+    r2_acts[3] = result[3] - ( r3_d_i[3] - r2_d_i[3] );	
     r2_acts[4] = symb_calc( r2_acts[3] );
     r2_acts[5] = r2_array_back[r2_acts[4]];
   end
@@ -277,7 +181,7 @@ always_ff @( posedge clk_i or posedge rst_i )
 // rotor 1 back movement
 always_comb
   begin
-    r1_acts[3] = result[4] - ( r2_s_d[4] - r1_s_d[4] );
+    r1_acts[3] = result[4] - ( r2_d_i[4] - r1_d_i[4] );
     r1_acts[4] = symb_calc( r1_acts[3] );
     r1_acts[5] = r1_array_back[r1_acts[4]];
   end
@@ -293,7 +197,7 @@ always_ff @( posedge clk_i or posedge rst_i )
 // out
 always_comb
   begin
-    out_presymb = result[5] - ( r1_s_d[5] - 7'b1 );
+    out_presymb = result[5] - ( r1_d_i[5] - 7'b1 );
     out_symb_o  = symb_calc( out_presymb );
   end
 
@@ -306,6 +210,6 @@ always_ff @( posedge clk_i or posedge rst_i )
   end
 
 // coded symbols are valid
-assign out_symb_val_o = en_val_i_d[5];
+assign encod_val_o = en_val_i_d[5];
 
 endmodule

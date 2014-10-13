@@ -13,7 +13,7 @@ module wrapper
   output logic signed [6:0] wrap_o,                // wrapper output
   output logic              wrap_val_o,            // wrapper output is valid
   output logic signed [6:0] in_en_o,               // generating incoming symbol for enigma
-  output logic              err_symb_o,            // if incoming symbol is wrong
+  output logic              wrg_symb_o,            // if incoming symbol is wrong
   output logic              en_val_o               // incoming symbol for enigma is valid
 );
 
@@ -37,17 +37,17 @@ logic [2:1]  encod_val_d;
 always_comb
   begin
     if( ( symb_val_i ) && ( ( wrap_i > 0 ) && ( wrap_i < 27 ) ) )
-      err_symb_o = 1'b0;
+      wrg_symb_o = 1'b0;
     else
       if( ( symb_val_i ) && !( ( wrap_i > 0 ) && ( wrap_i < 27 ) ) )
-        err_symb_o = 1'b1;
+        wrg_symb_o = 1'b1;
     else
-      err_symb_o = 1'b0;
+      wrg_symb_o = 1'b0;
   end
 
 // INPUT MEMORY BLOCKS 
 // input memory
-always_ff @( posedge clk_i or posedge rst_i )
+always_ff @( posedge clk_i )
   begin
     if( in_mem_wr_en )
       in_mem[in_mem_wr_addr] <= wrap_i;
@@ -122,7 +122,7 @@ always_comb
 
 // OUTPUT MEMORY BLOCKS-------------------------------------------
 // output memory
-always_ff @( posedge clk_i or posedge rst_i )
+always_ff @( posedge clk_i )
   begin
     if( out_mem_wr_en )
       begin
@@ -184,6 +184,7 @@ always_ff @( posedge clk_i or posedge rst_i )
       end
   end
 
-assign wrap_val_o = encod_val_i_d[2];
+assign wrap_val_o = encod_val_d[2];
 
 endmodule
+

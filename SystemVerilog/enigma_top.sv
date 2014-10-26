@@ -1,4 +1,9 @@
 module enigma_top
+#(
+  parameter R_INIT_VALUE    = 1,
+  parameter LETTERS         = 26,
+  parameter ROTORS_QUANTITY = 3
+)
 
 (
   input                     clk_i,
@@ -20,15 +25,9 @@ logic signed [6:0] cod_symb_trans;          // coded symbol transit between out_
 logic              noncod_val_trans;        // non-coded symbol validity transit between en_val_o and en_val_i, also in_symb_val_i
 logic              cod_val_trans;           // coded symbol validity transit between encod_val_o and encod_val_i
 
-// transit ports to connect enigma_1 and rotors
-logic      [6:0] r1_trans;
-logic [5:1][6:0] r1_trans_d;
-
-logic      [6:0] r2_trans;
-logic [4:1][6:0] r2_trans_d;
-
-logic      [6:0] r3_trans;
-logic [3:1][6:0] r3_trans_d;
+// logic for generate
+logic [3:1][6:0]      r_o;
+logic [3:1][5:1][6:0] r_d_o;
 
 
 // portmap for wrapper
@@ -57,32 +56,40 @@ enigma_1 en(
   .rotors_rst_i   ( rotors_rst_i      ),
   .in_symb_i      ( noncod_symb_trans ),
   
-  .r1_i           ( r1_trans          ),
-  .r1_d_i         ( r1_trans_d        ),
-  .r2_i           ( r2_trans          ),
-  .r2_d_i         ( r2_trans_d        ),
-  .r3_i           ( r3_trans          ),
-  .r3_d_i         ( r3_trans_d        ),
+  .r1_i           ( r_o[1]            ),
+  .r1_d_i         ( r_d_o[1]          ),
+  .r2_i           ( r_o[2]            ),
+  .r2_d_i         ( r_d_o[2]          ),
+  .r3_i           ( r_o[3]            ),
+  .r3_d_i         ( r_d_o[3]          ),
 
   .out_symb_o     ( cod_symb_trans    ),
   .encod_val_o    ( cod_val_trans     )
 );
 
 
-// portmap for rotors
-rotors rs(
-  .clk_i          ( clk_i            ),
-  .rst_i          ( rst_i            ),
-  .rotors_rst_i   ( rotors_rst_i     ),
-  .in_symb_val_i  ( noncod_val_trans ),
+// connecting rotors
+genvar n;
+generate
+  for( n = 1; n < ( ROTORS_QUANTITY + 1 ); n++)
+    begin : rotor_for_gen
+      rotor_for_gen  rg(
 
-  .r1_o           ( r1_trans         ),
-  .r1_d_o         ( r1_trans_d       ),
-  .r2_o           ( r2_trans         ),
-  .r2_d_o         ( r2_trans_d       ),
-  .r3_o           ( r3_trans         ),
-  .r3_d_o         ( r3_trans_d       )
-);
+        .clk_i          ( clk_i            ),
+        .rst_i          ( rst_i            ),
+        .rotors_rst_i   ( rotors_rst_i     ),
+        .in_symb_val_i  ( noncod_val_trans ),
+        .r_p_i          ( r_o[n-1]         ), 
+
+        .r_o            ( r_o[n]           ),
+        .r_d_o          ( r_d_o[n]         )
+
+        );
+      defparam rotor_for_gen[n].rg.R_INIT_VALUE = R_INIT_VALUE;
+      defparam rotor_for_gen[n].rg.LETTERS      = LETTERS;
+      defparam rotor_for_gen[n].rg.DEL_STR_NUM  = n;
+    end
+endgenerate
 
 
 endmodule

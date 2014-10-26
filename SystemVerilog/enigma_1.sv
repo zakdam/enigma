@@ -1,9 +1,5 @@
 module enigma_1
 #(
-  parameter R1_INIT_VALUE  = 1,
-  parameter R2_INIT_VALUE  = 1,
-  parameter R3_INIT_VALUE  = 1,
-
   parameter LETTERS = 26
 )
 

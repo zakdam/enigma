@@ -33,7 +33,7 @@ logic        out_mem_rd_en;
 
 logic [2:1]  encod_val_d;
 
-// incoming symbol is wrong signal
+// "incoming symbol is wrong" signal
 always_comb
   begin
     if( ( symb_val_i ) && ( ( wrap_i > 0 ) && ( wrap_i < 27 ) ) )
